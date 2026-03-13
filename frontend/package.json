@@ -1,0 +1,20 @@
+{
+  "name": "kids-story-generator",
+  "version": "1.0.0",
+  "description": "儿童故事生成器 - 为9-15岁儿童生成有趣的故事",
+  "author": "敖广",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}

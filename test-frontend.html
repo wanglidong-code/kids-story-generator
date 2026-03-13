@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童故事生成器 - 测试版</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .story {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            white-space: pre-line;
+        }
+        .loading {
+            text-align: center;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ 儿童故事生成器 ✨</h1>
+        <input type="text" id="theme" placeholder="输入故事主题，例如：魔法森林、太空冒险...">
+        <button onclick="generateStory()">生成故事 📖</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function generateStory() {
+            const theme = document.getElementById('theme').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!theme) {
+                resultDiv.innerHTML = '<div style="color: red;">请输入故事主题</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="loading">🧙‍♂️ 敖广正在创作故事...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/generate-story', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        theme: theme,
+                        max_words: 500
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h3>📖 ${data.theme}的故事</h3>
+                    <div class="story">${data.story}</div>
+                    <p style="margin-top: 10px; color: #666;">字数：${data.word_count}</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<div style="color: red;">❌ 生成失败: ${error.message}</div>`;
+            }
+        }
+        
+        // 允许按回车键生成故事
+        document.getElementById('theme').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateStory();
+            }
+        });
+    </script>
+</body>
+</html>

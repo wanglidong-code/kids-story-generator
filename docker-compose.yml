@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - story-net
+
+  # 前端服务 (使用 nginx 静态文件服务)
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./dist:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - story-net
+
+networks:
+  story-net:
+    driver: bridge
