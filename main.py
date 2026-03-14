@@ -4,8 +4,13 @@
 """
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
+import logging
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="儿童绘本生成器",
@@ -16,10 +21,10 @@ app = FastAPI(
 
 class StoryRequest(BaseModel):
     """故事生成请求模型"""
-    theme: str  # 故事主题
-    age_range: str  # 目标年龄段，如 "3-5 岁"
-    length: str = "short"  # 故事长度：short/medium/long
-    style: Optional[str] = "fantasy"  # 故事风格
+    theme: str = Field(..., min_length=1, max_length=100, description="故事主题")
+    age_range: str = Field(..., min_length=1, max_length=20, description="目标年龄段，如 '3-5 岁'")
+    length: str = Field(default="short", description="故事长度：short/medium/long")
+    style: Optional[str] = Field(default="fantasy", max_length=50, description="故事风格")
 
 
 class StoryResponse(BaseModel):
@@ -52,16 +57,24 @@ async def generate_story(request: StoryRequest):
     - **length**: 故事长度
     - **style**: 故事风格
     """
-    # TODO: 实现 AI 故事生成逻辑
-    return StoryResponse(
-        title=f"《{request.theme}的冒险》",
-        content=f"这是一个关于{request.theme}的故事...",
-        illustrations=["scene1.png", "scene2.png", "scene3.png"],
-        age_range=request.age_range
-    )
+    try:
+        logger.info(f"收到故事生成请求：theme={request.theme}, age_range={request.age_range}")
+        
+        # TODO: 实现 AI 故事生成逻辑
+        return StoryResponse(
+            title=f"《{request.theme}的冒险》",
+            content=f"这是一个关于{request.theme}的故事...",
+            illustrations=["scene1.png", "scene2.png", "scene3.png"],
+            age_range=request.age_range
+        )
+    except ValueError as e:
+        logger.error(f"参数错误：{e}")
+        raise HTTPException(status_code=400, detail=f"参数错误：{str(e)}")
+    except Exception as e:
+        logger.error(f"故事生成失败：{e}")
+        raise HTTPException(status_code=500, detail="故事生成失败，请稍后重试")
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-# TODO: 实现故事生成逻辑
