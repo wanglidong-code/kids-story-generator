@@ -4,15 +4,21 @@ const getApiBaseUrl = () => {
   if (window.location.hostname.includes('trycloudflare.com')) {
     return 'https://ict-exemption-shipping-colored.trycloudflare.com'
   }
-  // 本地开发环境
-  return 'http://localhost:8000'
+  // 生产环境：使用相对路径，通过 nginx 反向代理
+  // 本地开发环境：使用 localhost
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000'
+  }
+  // 其他情况（生产环境）使用相对路径
+  return ''
 }
 
 export const API_BASE_URL = getApiBaseUrl()
 
 // 生成故事 API
 export const generateStoryApi = async (data) => {
-  const response = await fetch(`${API_BASE_URL}/generate-story`, {
+  const apiPath = API_BASE_URL ? API_BASE_URL + '/generate-story' : '/api/generate-story'
+  const response = await fetch(apiPath, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
